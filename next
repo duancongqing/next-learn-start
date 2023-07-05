@@ -1,0 +1,362 @@
+Next.js 
+Next.js 是什么
+
+Next.js是一个流行的React框架。
+用于构建服务器端渲染（SSR）和静态生成（SSG）的Web应用程序。它提供了一套工具和约定，简化了开发过程
+在底层，Next.js 还为您抽象并自动配置工具，例如捆绑、编译等。这使您可以专注于构建应用程序，而不是花时间设置工具。
+
+优点：
+
+搭建轻松，完善的React架构。配置路由，webpack，缓存，next.js 全都配置好了
+
+自带数据同步。 服务端数据变化之后，客户端数据数据同步，开发人员不用做操作
+
+有丰富的插件。 生态丰富
+
+灵活配置。
+
+
+构建一个Next应用
+
+1. 手动搭建
+
+2. 使用create - next - app
+
+项目目录
+
+<img src="/Users/dcq/Library/Application Support/typora-user-images/image-20230630115423636.png" alt="image-20230630115423636" style="zoom:50%;" />image-20230630115423636       
+
+Layout.js   布局 
+
+路由配置
+
+嵌套路由
+image-20230628165303931
+
+动态路由
+
+[...folder]:  匹配所有子节点路由 pages/foo, pages/foo/bar
+
+image-20230628165353991 
+
+路由标签跳转和导航
+
+
+提供 usePathname, useRouter 操作路由跳转 和 路由参数
+​
+编程式跳转：router.push
+标签式跳转：<Link href="/"><a></a></Link>
+​
+路由传递参数：<Link href="/demo?name="zhangsan"><a></a></Link>
+           <Link href={{pathname:'/demo', query:{name:'zhangsan'}}}><a></a></Link>
+   接受参数：withRouter 高阶组件
+​
+路由提供的钩子事件：
+  // routeChangeStart
+  // routeChangeComplete
+  // beforeHistoryChange
+  // routeChangeError
+  // hashChangeStart
+  // hashCHangeComplete
+监听路由变化。
+Route Handlers
+
+写在app文件夹下面用来发送请求，获取数据 注意： 不能和page.js 写在同一层路径
+使用  SWR 去请求数据 简化Next.js  项目获取流程
+
+
+import { NextResponse } from 'next/server'
+ 
+export async function GET() {
+  const res = await fetch('https://data.mongodb-api.com/...', {
+    headers: {
+      'Content-Type': 'application/json',
+      'API-Key': process.env.DATA_API_KEY,
+    },
+  })
+  const data = await res.json()
+ 
+  return NextResponse.json({ data })
+}
+服务器组件 / 客户端组件
+
+服务器组件：
+
+next中的服务器组件指的是框架提供的服务器端渲染能力。当用户请求页面时，next的服务器组件在服务器上生成HTML内容并将其发送到客户端。这样可以加快初始页面加载速度，并改善搜索引擎优化（SEO）。服务器组件处理从API或数据库获取数据、渲染React组件并将HTML返回给客户端等任务。
+
+客户端组件：
+
+next中的客户端组件指的是客户端渲染能力。一旦初始HTML加载完成，客户端组件接管并处理后续的交互和渲染工作。这包括处理用户事件、更新UI和进行额外的API请求。客户端组件负责初始页面加载后应用程序的动态行为。
+
+服务器组件和客户端组件的区别
+
+服务器组件模块图中的组件保证仅在服务器上呈现。
+
+客户端组件模块图中的组件主要在客户端上渲染，但使用 Next.js，它们也可以在服务器上预渲染并在客户端上进行水化（hydrated）。
+
+该指令必须在任何导入之前在文件顶部"use client"定义。
+
+"use client"不需要在每个文件中定义。客户端模块边界只需在“入口点”定义一次，所有导入其中的模块都将被视为客户端组件。
+
+什么时候使用服务端组件什么时候使用客户端组件
+
+使用服务端组件： 获取数据；访问后端资源；
+
+使用客户端组件：添加交互性和事件监听器；使用useState和 useEffect 状态和生命周期；使用浏览器API等
+
+组合服务端组件和客户端组件
+
+React 按如下方式处理渲染：
+
+在服务器上，React在将结果发送到客户端之前渲染所有服务器组件。
+
+这包括嵌套在客户端组件内的服务器组件。跳过此阶段遇到的客户端组件。
+
+在客户端，React 渲染客户端组件并插入服务器组件的渲染结果中，合并服务器和客户端上完成的工作。
+
+如果任何服务器组件嵌套在客户端组件内，则它们呈现的内容将正确放置在客户端组件内。
+
+值得注意的是：在 Next.js 中，在初始页面加载期间，上述步骤中服务器组件和客户端组件的渲染结果都以HTML 形式在服务器上预渲染，以产生更快的初始页面加载。
+
+获取数据
+
+SSR  (server-side rendering)
+
+每次刷新页面都会打回到服务端，在服务端向远程获取数据。渲染成 HTML 页面 再返回到前端
+
+SSG  (Static-site generation )
+
+静态站点生成。静态文件可以部署到任何支持静态资源托管的服务器上 。 常见静态网站生成器 hugo，Gatsby 
+
+CSR (Client-side rendering)
+
+常见的前端渲染 
+
+区别：
+
+CSR： 前端页面渲染，通过webpack，rollup，vite 等打包工具进行打包 。打包之后的产物就是 html , 只是一个空壳子，有一个id=root的div，通过一个入口文件main.js 前端框架开始动态渲染元素。好处：开发简单 缺点：SEO 差，用户可能较长的看见一个空页面
+
+SSR： 在后端直接把数据填到HTML页面中，直接返回到前端。因为少了很多js加载和请求，所以相应时间更短。同时对于SEO查找友好，爬虫爬的有效数据更多。使用 getServerSideProps 在运行时起获取数据。
+
+image-20230703164737681、
+
+SSG： SSR 每次刷新页面都要到服务端，服务端进行一次数据装填，再返回到前端。SSG 在编译阶段就已经把页面生成好了，再多次访问页面的时候用的还是原来的页面。适用于数据不常变动的页面。  使用 getStaticProps 在build time 时期获取
+
+image-20230703164714205
+
+服务端组件获取数据：
+
+
+async function getData() {
+  const res = await fetch('https://api.example.com/...')
+  // The return value is *not* serialized
+  // You can return Date, Map, Set, etc.
+ 
+  // Recommendation: handle errors
+  if (!res.ok) {
+    // This will activate the closest `error.js` Error Boundary
+    throw new Error('Failed to fetch data')
+  }
+ 
+  return res.json()
+}
+ 
+export default async function Page() {
+  const data = await getData()
+ 
+  return <main></main>
+}
+​
+next.js 提供 cookies() / headers() 
+客户端组件获取数据
+第三方库： SWR / React Query
+
+静态获取数据
+
+构建时获取数据（building time）数据不经常变化，有利于SEO
+
+
+export async function getStaticProps() {
+  // 获取静态数据
+  const data = await fetch('https://api.example.com/data');
+  const jsonData = await data.json();
+​
+  return {
+    props: {
+      data: jsonData,
+    },
+  };
+}
+​
+function MyPage({ data }) {
+  // 使用获取到的静态数据
+  return (
+    <div>
+      <h1>静态获取数据示例</h1>
+      <p>{data}</p>
+    </div>
+  );
+}
+​
+export default MyPage;
+动态获取数据
+
+运行时获取数据（runtime）数据经常变化，请求参数是可变的
+
+
+export async function getServerSideProps(context) {
+  // 根据请求参数获取动态数据
+  const { id } = context.query;
+  const data = await fetch(`https://api.example.com/data/${id}`);
+  const jsonData = await data.json();
+​
+  return {
+    props: {
+      data: jsonData,
+    },
+  };
+}
+​
+function MyPage({ data }) {
+  // 使用获取到的动态数据
+  return (
+    <div>
+      <h1>动态获取数据示例</h1>
+      <p>{data}</p>
+    </div>
+  );
+}
+​
+export default MyPage;
+样式Styling
+
+Css module 
+
+Tailwind css
+
+Css in Js
+
+Sass
+
+优化
+
+Next.js 内部自带 优化 用来提升应用的速度
+
+Images      next/imag
+
+Fonts         next/font 
+
+Script        next/script  // 引入js文件
+
+Static Assets     AWS S3  云存储服务 静态资源托管 数据存储
+
+Lazy Loading    
+
+Using Dynamic Imports with next/dynamic
+
+Using React.lazy() with Suspense
+
+配置
+
+API
+组件
+
+Font     
+
+Image
+
+Link
+
+Script
+
+服务端开发
+
+我们会正式进入服务端开发领域，使用 Next.js 的 API 路由及 Node 能力，来开发相应的接口，为前端页面提供数据。
+
+前端请求数据 通过 axios，fetch 
+api 文件夹 对应后端路由
+
+Next/cookie   可以在客户端 / 服务端都能拿到cookie信息
+
+解决刷新页面cookie持久化问题：
+通过 getInitialProps  拿到服务器端传的cookie , 把这个值传入到首页中，拿到cookie作为初始值 通过 createStore  创建 store
+
+SSR  
+在 getServerSideProps 中连接数据库，拿到数据库的列表数据，注入到当前页面的属性中。
+
+
+export async function getServerSideProps( { params } ){
+  
+  // params { id:003 } 动态路由的路由参数
+  return {
+    props: {
+      user: {name: 'zhangsan'}
+    }
+  }
+}
+App Router
+
+Next.js 新提供的路由器，用来管理应用程序不同页面之间的导航。 支持 next  版本13以上。 
+
+改变：使用App Router的之后的组件默认使用Server Component，自动开启优化。  详细改变参考文档
+
+路由的写法 
+
+获取数据的方式 
+
+metaData SEO 优化
+
+Api 文件写接口  https://nextjs.org/docs/app/building-your-application/routing/router-handlers
+
+ 使用webpack配置：https://nextjs.org/docs/app/api-reference/next-config-js/webpack
+
+部署
+
+1. Vercel 部署
+
+       连接自己的github账号，导入要部署的项目，点击一键部署
+
+	   对于新创建的分支，在推送的远端之后，vercel 会自动监听到新分支，自动部署
+
+	  上生产有两种方式，git 上 提交 MR，把代码合并到main 分支；把preview分支改为prod
+
+2. Static Exports
+
+	   next.js 在支持static exports 之后  static site or Single-Page Application (SPA) ，在运行next build 之后可以部署到任何支持HTML/CSS/JS 静态资源托管的服  务器上。
+
+
+/**
+ * @type {import('next').NextConfig}
+ * 配置之后 变成静态导出
+ */
+const nextConfig = {
+  output: 'export',
+  // Optional: Add a trailing slash to all paths `/about` -> `/about/`
+  // trailingSlash: true,
+  // Optional: Change the output directory `out` -> `dist`
+  // distDir: 'dist',
+}
+ 
+module.exports = nextConfig
+	
+
+3. Jenkins 部署 
+
+	  
+
+next 有什么部署方式 / 不同部署方式优缺点 适用场景  /  获取数据方式 / 请求第三方数据涉及的代理方式  适用场景 / 
+
+Static Export
+
+静态导出部署：适合数据不常变化的网站 / 页面 。导出的都是含有数据的html页面，只在build的时候请求一次接口，如果数据变化频繁就需要多次打包部署。
+
+非静态导出
+
+如果是服务端渲染，其实没有前端页面，都是由服务端进行渲染。所有内容包括接口部分都会打包部署到服务器上。next 本身内置node服务器，打包的时候会启动node服务器，浏览器向服务器发起请求的时候会先请求数据把数据装填到html中，返回给浏览器。
+
+next 请求数据可以在api中连接数据库请求数据 ； 通过配置代理请求第三方数据；
+
+配置代理方式：通过nginx；next 本身可以配置代理； 
+
+项目比较轻量：使用next内置的node，大型项目可以使用三方node框架 
+
